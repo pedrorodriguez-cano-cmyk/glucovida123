@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlucoVida - App para la Diabetes</title>
+  <style>
+    :root {
+      --primary: #A8E6CF;
+      --primary-dark: #74C69D;
+      --accent: #52B788;
+      --bg: #F4F9F6;
+      --card-bg: #FFFFFF;
+      --text: #2D3748;
+      --text-muted: #718096;
+      --border: #E2E8F0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #E2ECE9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* App Container (Mobile Frame) */
+    .app-container {
+      width: 100%;
+      max-width: 420px;
+      height: 90vh;
+      max-height: 850px;
+      background-color: var(--bg);
+      border-radius: 28px;
+      box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar Header */
+    .app-header {
+      background-color: var(--card-bg);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background-color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #2D5A44;
+      font-size: 18px;
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2D5A44;
+    }
+
+    .nav-home-btn {
+      background: var(--primary);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #2D5A44;
+      transition: background 0.2s;
+    }
+
+    .nav-home-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Screen Views */
+    .screen {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    /* Screen 1: Login */
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      text-align: center;
+    }
+
+    .login-logo {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: white;
+      margin-bottom: 15px;
+      box-shadow: 0 8px 16px rgba(116, 198, 157, 0.3);
+    }
+
+    .login-title {
+      font-size: 28px;
+      color: #2D5A44;
+      margin-bottom: 5px;
+    }
+
+    .login-subtitle {
+      color: var(--text-muted);
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .form-group {
+      width: 100%;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      font-size: 14px;
+      background: white;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 4px 12px rgba(82, 183, 136, 0.3);
+    }
+
+    /* Screen 2: Feed Principal Layout */
+    .feed-layout {
+      position: relative;
+      padding-left: 55px; /* Space for vertical left bar */
+      min-height: 100%;
+      padding-bottom: 80px;
+    }
+
+    .vertical-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 45px;
+      background-color: var(--primary);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+    }
+
+    .btn-plus {
+      width: 32px;
+      height: 32px;
+      background-color: white;
+      border-radius: 50%;
+      border: none;
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .feed-content-box {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      margin-top: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .feed-content-box h2 {
+      font-size: 18px;
+      color: #2D5A44;
+      margin-bottom: 12px;
+    }
+
+    .feed-content-box p {
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background-color: var(--card-bg);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-item {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+
+    .nav-item.active {
+      background-color: var(--primary);
+    }
+
+    /* Cards & Lists */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .card h3 {
+      font-size: 16px;
+      color: #2D5A44;
+      margin-bottom: 6px;
+    }
+
+    .card-meta {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .recipe-details {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+      display: none;
+    }
+
+    .recipe-details.active {
+      display: block;
+    }
+
+    .recipe-details h4 {
+      font-size: 13px;
+      margin: 8px 0 4px 0;
+      color: var(--text);
+    }
+
+    .recipe-details ul, .recipe-details ol {
+      padding-left: 20px;
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .btn-toggle-recipe {
+      background: var(--primary);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #2D5A44;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* Info Pages Submenu */
+    .info-nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .info-nav-btn {
+      white-space: nowrap;
+      padding: 8px 14px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .info-nav-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .page-title {
+      font-size: 20px;
+      color: #2D5A44;
+      margin-bottom: 15px;
+    }
+
+    .info-content {
+      background: white;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header General -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo">G</div>
+        <div class="brand-name">GlucoVida</div>
+      </div>
+      <button class="nav-home-btn" id="btn-home" onclick="showScreen('screen-feed')" title="Volver al Feed" style="display: none;">➔</button>
+    </header>
+
+    <!-- PANTALLA 1: Login / Inicio -->
+    <section id="screen-login" class="screen active">
+      <div class="login-screen">
+        <div class="login-logo">🌿</div>
+        <h1 class="login-title">GlucoVida</h1>
+        <p class="login-subtitle">Tu compañero de salud cotidiano</p>
+        
+        <form onsubmit="event.preventDefault(); showScreen('screen-feed');" style="width: 100%;">
+          <div class="form-group">
+            <label>Correo Electrónico</label>
+            <input type="email" placeholder="ejemplo@correo.com" required>
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn-submit">Iniciar Sesión</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- PANTALLA 2: Feed Principal -->
+    <section id="screen-feed" class="screen">
+      <div class="feed-layout">
+        <div class="vertical-bar">
+          <button class="btn-plus" onclick="showScreen('screen-info')" title="Información sobre la enfermedad">+</button>
+        </div>
+        
+        <div class="feed-content-box">
+          <h2>Información Importante</h2>
+          <p>
+            La diabetes y prediabetes son una enfermedad en la cual el cuerpo tiene complicaciones en la creación o al responder a la insulina una hormona que ayuda a transportar la glucosa ( azúcar). Aunque la diabetes tiene mayores complicaciones con esta a comparación de la prediabetes. Ambas producen otras enfermedades al cuerpo, como problemas cardiovasculares , renales, entre otros.
+          </p>
+        </div>
+      </div>
+
+      <nav class="bottom-nav">
+        <button class="nav-item active" onclick="showScreen('screen-recetas')" title="Recetas">📖</button>
+        <button class="nav-item" onclick="showScreen('screen-marcas')" title="Marcas">🧺</button>
+        <button class="nav-item" onclick="showScreen('screen-restaurantes')" title="Restaurantes">🍽️</button>
+      </nav>
+    </section>
+
+    <!-- PANTALLA 2-ALT: Recetas sin Azúcar (Icono Libro) -->
+    <section id="screen-recetas" class="screen">
+      <h2 class="page-title">📖 Recetas sin Azúcar</h2>
+      
+      <div class="card">
+        <h3>Queques</h3>
+        <p>Esponjoso e ideal para la merienda sin alterar la glucosa.</p>
+        <button class="btn-toggle-recipe" onclick="toggleRecipe('recipe-queque')">Ver receta completa</button>
+        <div id="recipe-queque" class="recipe-details">
+          <h4>Ingredientes:</h4>
+          <ul>
+            <li>2 tazas de harina integral</li>
+            <li>1/2 taza de endulzante apto para cocción</li>
+            <li>3 huevos</li>
+            <li>1/2 taza de aceite de oliva suave</li>
+            <li>1 cda. de polvo de hornear</li>
+            <li>Ralladura de 1 limón</li>
+          </ul>
+          <h4>Pasos:</h4>
+          <ol>
+            <li>Batir los huevos con el endulzante y la ralladura de limón.</li>
+            <li>Agregar el aceite poco a poco.</li>
+            <li>Incorporar la harina con el polvo de hornear tamizados.</li>
+            <li>Hornear a 180°C durante 35 minutos.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Pizza de Masa Integral</h3>
+        <p>Una alternativa baja en índice glucémico para disfrutar el fin de semana.</p>
+        <button class="btn-toggle-recipe" onclick="toggleRecipe('recipe-pizza')">Ver receta completa</button>
+        <div id="recipe-pizza" class="recipe-details">
+          <h4>Ingredientes:</h4>
+          <ul>
+            <li>2 tazas de harina integral de trigo</li>
+            <li>1 cda. de aceite de oliva</li>
+            <li>1/2 taza de agua tibia</li>
+            <li>Salsa de tomate natural (sin azúcar añadida)</li>
+            <li>Queso bajo en grasa y verduras al gusto</li>
+          </ul>
+          <h4>Pasos:</h4>
+          <ol>
+            <li>Mezclar harina, agua y aceite hasta formar una masa suave.</li>
+            <li>Estirar en una bandeja y prehornear por 8 minutos a 200°C.</li>
+            <li>Agregar la salsa, el queso y tus verduras favoritas.</li>
+            <li>Gratinar en el horno durante 10 minutos adicionales.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Pan Multigrano</h3>
+        <p>Alto en fibra, ayuda a mantener estables los niveles de azúcar.</p>
+        <button class="btn-toggle-recipe" onclick="toggleRecipe('recipe-pan')">Ver receta completa</button>
+        <div id="recipe-pan" class="recipe-details">
+          <h4>Ingredientes:</h4>
+          <ul>
+            <li>3 tazas de harina de avena o linaza</li>
+            <li>1 sobre de levadura seca</li>
+            <li>1 taza de agua tibia</li>
+            <li>Semillas variadas (chía, maravilla, sésamo)</li>
+          </ul>
+          <h4>Pasos:</h4>
+          <ol>
+            <li>Disolver la levadura en el agua tibia.</li>
+            <li>Integrar con la harina y amasar por 5 minutos.</li>
+            <li>Dejar reposar 45 minutos para que leve.</li>
+            <li>Formar el pan, decorar con semillas y hornear a 190°C por 40 mins.</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Galletas de Avena</h3>
+        <p>Crujientes, deliciosas y 100% libres de azúcar refinada.</p>
+        <button class="btn-toggle-recipe" onclick="toggleRecipe('recipe-galletas')">Ver receta completa</button>
+        <div id="recipe-galletas" class="recipe-details">
+          <h4>Ingredientes:</h4>
+          <ul>
+            <li>1.5 tazas de avena en hojuelas</li>
+            <li>2 plátanos maduros molidos (endulzante natural)</li>
+            <li>1 cdta. de canela en polvo</li>
+            <li>Chispas de chocolate 70% cacao sin azúcar</li>
+          </ul>
+          <h4>Pasos:</h4>
+          <ol>
+            <li>Mezclar el plátano molido con la avena y la canela.</li>
+            <li>Agregar las chispas de chocolate.</li>
+            <li>Formar pequeñas bolitas en una lata para horno y aplastarlas.</li>
+            <li>Hornear a 180°C durante 15 minutos hasta dorar.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANTALLA 3: Cesta / Marcas Aptas (Icono Cesta) -->
+    <section id="screen-marcas" class="screen">
+      <h2 class="page-title">🧺 Marcas y Productos Aptos</h2>
+
+      <div class="card">
+        <h3>Naturalist</h3>
+        <div class="card-meta">Categoría: Repostería | Precios: $2.000 - $6.000</div>
+        <p><strong>Dónde encontrar:</strong> Supermercados y tiendas online.</p>
+      </div>
+
+      <div class="card">
+        <h3>Daily Foods</h3>
+        <div class="card-meta">Categoría: Dulces | Precios: $3.000 - $7.000</div>
+        <p><strong>Dónde encontrar:</strong> Tiendas online.</p>
+      </div>
+
+      <div class="card">
+        <h3>Sugaut</h3>
+        <div class="card-meta">Categoría: Dulces | Precios: $3.000 - $10.000</div>
+        <p><strong>Dónde encontrar:</strong> Tiendas saludables, online y farmacias.</p>
+      </div>
+
+      <div class="card">
+        <h3>Nutra Food</h3>
+        <div class="card-meta">Categoría: Salado | Precios: $6.000 - $7.500</div>
+        <p><strong>Dónde encontrar:</strong> Tiendas online.</p>
+      </div>
+    </section>
+
+    <!-- PANTALLA 4: Restaurantes (Icono Plato) -->
+    <section id="screen-restaurantes" class="screen">
+      <h2 class="page-title">🍽️ Restaurantes Aptos</h2>
+
+      <div class="card">
+        <h3>1. El Naturista</h3>
+        <div class="card-meta">Precios: $5.000 - $10.000</div>
+        <p>Opciones saludables y menú adaptado para un estilo de vida bajo en azúcar.</p>
+      </div>
+
+      <div class="card">
+        <h3>2. Restaurante Evergreen</h3>
+        <div class="card-meta">Precios: $5.000 - $10.000</div>
+        <p><strong>Ubicación:</strong> Nataniel Cox, Santiago Centro.</p>
+      </div>
+
+      <div class="card">
+        <h3>3. Sapiens. Comida Saludable</h3>
+        <div class="card-meta">Precios: $10.000 - $15.000</div>
+        <p><strong>Ubicación:</strong> Av. Italia 1206, Providencia.</p>
+      </div>
+
+      <div class="card">
+        <h3>4. El Huerto</h3>
+        <div class="card-meta">Precios: $10.000 - $20.000</div>
+        <p><strong>Ubicación:</strong> Orrego Luco 54, Providencia.</p>
+      </div>
+
+      <div class="card">
+        <h3>5. Quinua</h3>
+        <div class="card-meta">Precios: $15.000 - $20.000</div>
+        <p><strong>Ubicación:</strong> Av. Luis Pasteur 5393, Vitacura.</p>
+      </div>
+    </section>
+
+    <!-- PANTALLA 5: Guía Médica e Información (Botón +) -->
+    <section id="screen-info" class="screen">
+      <div class="info-nav">
+        <button class="info-nav-btn active" onclick="showInfoPage('info-diabetes', this)">Diabetes</button>
+        <button class="info-nav-btn" onclick="showInfoPage('info-prediabetes', this)">Prediabetes</button>
+        <button class="info-nav-btn" onclick="showInfoPage('info-tipo1', this)">Tipo 1</button>
+        <button class="info-nav-btn" onclick="showInfoPage('info-tipo2', this)">Tipo 2</button>
+        <button class="info-nav-btn" onclick="showInfoPage('info-gestacional', this)">Gestacional</button>
+      </div>
+
+      <!-- Pagina 1: Diabetes -->
+      <div id="info-diabetes" class="info-tab">
+        <h2 class="page-title">Diabetes</h2>
+        <div class="info-content">
+          La diabetes es una enfermedad en la cual se produce menos insulina o resistencia a ella. La insulina es una hormona creada en el páncreas, un órgano ubicado en el abdomen que crea enzimas y hormonas que descomponen la comida para que el cuerpo absorba los nutrientes y los utiliza como energía. Cuando los niveles de azúcar en la sangre están muy elevados le llega una señal al páncreas para que células especiales llamadas células beta produzcan insulina.<br><br>
+          El trabajo de esta es ayudar a transportar la glucosa por la sangre a músculos, grasa y otras células para ser almacenada o utilizada como energía. Las personas diabéticas tienen dificultades con este proceso ya sea porque su cuerpo produce menos o nula insulina o el cuerpo ya no no responde a esta, haciendo que queden niveles altos de glucosa en la sangre que no se puede transformar a la energía.<br><br>
+          Para diagnosticar diabetes se usa un procedimiento que mide el promedio de la cantidad de glucosa en la sangre en promedio de tres meses (A1c). Cuando es 6,5% o más es diagnosticado con diabetes y después se hacen otros procedimientos para descifrar cual. La diabetes 1 y 2 son crónicas, es decir no se curan. Es muy importante tratarlas porque con el tiempo provoca graves problemas a la salud, como enfermedades cardiacas, renales, pérdida de visión y riesgos de accidentes cerebrovasculares.<br><br>
+          Por otro lado, los prediabéticos es cuando los niveles de azúcar son altos pero no lo suficiente como para ser diabetico. La diabetes gestacional tampoco es crónica, si no son tratados puede terminar desarrollándose en algún tipo de diabetes.
+        </div>
+      </div>
+
+      <!-- Pagina 2: Prediabetes -->
+      <div id="info-prediabetes" class="info-tab" style="display: none;">
+        <h2 class="page-title">Prediabetes</h2>
+        <div class="info-content">
+          La prediabetes es cuando los niveles de glucosa en la sangre son altos pero no son lo suficientemente para ser diagnosticado con diabetes ( A1c está entre 5,7% y 6,4%) . La gente con mayor riesgo a desarrollar estas son las personas con presión arterial alta, niveles altos de triglicéridos, apenea obstructiva del sueño (es decir dejar de respirar varias veces mientras duerme), personas que fuman tabaco, ancestros, peso, edad, inactividad física y mala alimentación.<br><br>
+          Al igual que en la diabetes esto pasa porque el cuerpo se hace resistente a la insulina o porque produce menos, aunque en los prediabéticos es en menor escala. Adultos y niños pre diabéticos son más propensos a desarrollar diabetes tipo 2 pero es evitable, al tener un estilo de vida saludable disminuye la posibilidad de desarrollarla.<br><br>
+          La prediabetes no suele tener síntomas en las personas que lo tienen, pero un buen indicador es el oscurecimiento de ciertas partes de la piel alrededor del cuerpo. La gente con prediabetes no solo es más propensa a desarrollar diabetes tipo 2, sino que también a sufrir problemas cardiovasculares.
+        </div>
+      </div>
+
+      <!-- Pagina 3: Diabetes Tipo 1 -->
+      <div id="info-tipo1" class="info-tab" style="display: none;">
+        <h2 class="page-title">Diabetes Tipo 1</h2>
+        <div class="info-content">
+          La diabetes tipo 1 a diferencia con los otros tipos de diabetes, es una enfermedad autoinmune. Cuando células inmunes del cuerpo atacan sin querer tejidos sanos porque los confunde con amenazas. En este caso las células inmunes atacan por accidente las células beta, las cuales producen insulina en el páncreas causando altos niveles de glucosa en la sangre. Las células tienen poca energía aunque haya altos niveles de glucosa en la sangre haciendo que procesos metabólicos del cuerpo cambien, por ejemplo usar grasas y proteínas como fuentes de energía.<br><br>
+          Cualquiera podría desarrollar esta enfermedad pero se ha diagnosticado con mayor frecuencia a niños, adolescentes y adultos jóvenes. Los síntomas de este son: Estar sediento y sentirse hambriento muy seguido, tener visión borrosa, hormigueo en los pies, pérdida de peso a pesar del aumento del apetito y orinar con mucha frecuencia son las principales advertencias pero cuando el nivel de azúcar está muy alto piel y boca secas, náuseas, vómitos y dolor de estómago.<br><br>
+          Los tratamientos para este tipo suele ser la administración de insulina, como inyecciones, varían entre 30 minutos y 8 horas para tener su máximo efecto y duran entre 4 y 24 horas dependiendo de la inyección que tomes ( menor duración= Humulin R, Novolin R y Afrezza. Mayor = Novolin N y Humulin N.) Al igual que también existen las bombas de insulina que son pequeños dispositivos que van en el abdomen bajo que se conecta con un tubo a una sonda, a este dispositivo se le programa cantidades de insulina además que horarios de comida. Estos tratamientos van de la mano con un estilo de vida saludable.
+        </div>
+      </div>
+
+      <!-- Pagina 4: Diabetes Tipo 2 -->
+      <div id="info-tipo2" class="info-tab" style="display: none;">
+        <h2 class="page-title">Diabetes Tipo 2</h2>
+        <div class="info-content">
+          La Diabetes tipo 2 suele dar a personas con sobrepeso o obesidad, que no hacen actividad física, por genética, gente de mediana edad o mayores (aunque cada vez aparece más en menores) , prediabéticos o mujeres que tuvieron diabetes gestacional. Esta no es una enfermedad autoinmune como la diabetes tipo uno pero si es crónica.<br><br>
+          Normalmente empieza por resistencia a la insulina, en otras palabras el cuerpo ya no responde igual a ésta. lo cual hace que el cuerpo necesite más insulina para ayudar a que la glucosa entre a las células del cuerpo y así usarla como energía. Inicialmente el cuerpo produce más insulina para poder lograr esto pero con el tiempo el cuerpo no es capaz de producir suficiente y los niveles de azúcar en la sangre aumentan algo que puede causar futuros problemas a la salud.<br><br>
+          Este comparte síntomas con el diabetes tipo uno pero en el diabetes tipo dos también se presenta cansancio, heridas que no cicatrizan correctamente o muy lento, hormigueo en los pies como en la diabetes tipo 1 pero también en las manos y niveles de triglicéridos altos y colesterol alterado.<br><br>
+          Se diagnostica con la prueba de A1c, prueba de glucosa plasmática en ayunas o prueba aleatoria de glucosa en plasma cuando la prueba se hace con urgencia y no se puede esperar a estar en ayunas. Tener una buena alimentación e implementar un estilo de vida más activo es parte de su tratamiento, hay pastillas que ayudan a que el cuerpo sea más sensible a la insulina, aumenta la sensibilidad a esta o ayudan con la digestión y la absorción de carbohidratos. La más común y que se receta con mayor frecuencia es la metformina , la cual es un medicamento oral que hace que el hígado produzca menos glucosa y que el cuerpo sea más sensible a la insulina, al igual que tiene un efecto positivo con los niveles de colesterol. Hay dos tipos, una que se toma entre 2 y 3 veces al dia y otra que es una dosis al día.
+        </div>
+      </div>
+
+      <!-- Pagina 5: Diabetes Gestacional -->
+      <div id="info-gestacional" class="info-tab" style="display: none;">
+        <h2 class="page-title">Diabetes Gestacional</h2>
+        <div class="info-content">
+          La diabetes gestacional le pasa solo a mujeres embarazadas por el cambio en las hormonas, ya que la respuesta a la insulina disminuye haciendo que los niveles de azúcar en la sangre aumenten. Las posibilidades de que esto le pase a una mujer embarazada son mayores cuando tenía sobrepeso antes o durante el embarazo, tiene más de 25 años, genética, presión arterial alta, aumento excesivo de peso durante el embarazo o presenta síndrome de ovario poliquístico ( provoca desequilibrio en la producción de hormonas).<br><br>
+          Este tipo de diabetes presenta fatiga, temblores, mayor frecuencia de infecciones y aumento de sed. No es crónica y suele irse después del embarazo si es tratada pero aumenta las posibilidades de desarrollar diabetes tipo 2. Su tratamiento suele ser solo mejorar la dieta y actividad física para que los niveles de sangre se encuentren dentro de los límites.<br><br>
+          Se diagnostica en la prueba oral de tolerancia a la glucosa entre las 24 y 28 semanas de embarazo, esta prueba consiste de tomar un líquido con glucosa en ayunas y después de una hora sacan sangre para ver la reacción que tuvo su cuerpo a la glucosa.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // Gestión de Navegación de Pantallas
+    function showScreen(screenId) {
+      // Ocultar todas las pantallas
+      const screens = document.querySelectorAll('.screen');
+      screens.forEach(screen => screen.classList.remove('active'));
+
+      // Mostrar la pantalla seleccionada
+      const targetScreen = document.getElementById(screenId);
+      if (targetScreen) {
+        targetScreen.classList.add('active');
+      }
+
+      // Mostrar u ocultar el botón de retorno según la pantalla
+      const btnHome = document.getElementById('btn-home');
+      if (screenId === 'screen-login') {
+        btnHome.style.display = 'none';
+      } else {
+        btnHome.style.display = 'flex';
+      }
+
+      // Actualizar estado activo en la barra inferior si corresponde
+      const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+      navItems.forEach(item => item.classList.remove('active'));
+      
+      if (screenId === 'screen-recetas') navItems[0].classList.add('active');
+      if (screenId === 'screen-marcas') navItems[1].classList.add('active');
+      if (screenId === 'screen-restaurantes') navItems[2].classList.add('active');
+    }
+
+    // Desplegar/ocultar detalles de las recetas
+    function toggleRecipe(recipeId) {
+      const recipeDetails = document.getElementById(recipeId);
+      if (recipeDetails) {
+        recipeDetails.classList.toggle('active');
+      }
+    }
+
+    // Navegación entre pestañas de información (Pantalla 5)
+    function showInfoPage(pageId, btnElement) {
+      // Ocultar todas las pestañas de contenido informativo
+      const tabs = document.querySelectorAll('.info-tab');
+      tabs.forEach(tab => tab.style.display = 'none');
+
+      // Remover estado activo de los botones de subnavegación
+      const buttons = document.querySelectorAll('.info-nav-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      // Mostrar la pestaña seleccionada y activar botón
+      document.getElementById(pageId).style.display = 'block';
+      if (btnElement) {
+        btnElement.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>
